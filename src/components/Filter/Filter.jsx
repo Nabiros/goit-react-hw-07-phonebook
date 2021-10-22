@@ -1,6 +1,7 @@
 import { Wrapper, Label, Input } from "./Filter.styled";
 import { connect } from "react-redux";
 import { getFilteredName } from "../../redux/PhoneBook/actions";
+import { getFilter } from "../../redux/PhoneBook/selectors";
 
 const Filter = ({ value, onChange }) => (
   <Wrapper>
@@ -10,7 +11,7 @@ const Filter = ({ value, onChange }) => (
 );
 
 const mapStateToProps = state => ({
-  value: state.contacts.filter,
+  value: getFilter(state),
 });
 
 const mapDispatchToProps = dispatch => ({

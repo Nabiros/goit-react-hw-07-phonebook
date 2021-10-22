@@ -1,7 +1,8 @@
 import { List, ListItem } from "./ContactsList.styled";
-import { Button } from '../Buttons/Buttons.styled';
+import { Button } from '../../App/App.styled';
 import { connect } from "react-redux";
 import { removeContact } from "../../redux/PhoneBook/actions";
+import { getFilteredName } from '../../redux/PhoneBook/selectors';
 
 function ContactsList({ contacts, deleteId }) {
   return (
@@ -23,14 +24,9 @@ function ContactsList({ contacts, deleteId }) {
   );
 }
 
-const nameFilter = state => {
-  return state.contacts.items.filter(contact =>
-    contact.name.toLowerCase().includes(state.contacts.filter.toLowerCase()),
-  );
-};
 
 const mapStateToProps = state => ({
-  contacts: nameFilter(state),
+  contacts: getFilteredName(state),
 });
 
 const mapDispatchToProps = dispatch => ({

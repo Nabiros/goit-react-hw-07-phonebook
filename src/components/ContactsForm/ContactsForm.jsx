@@ -1,17 +1,17 @@
 import { Form, Label, Input} from './ContactsForm.styled';
-import { Button } from '../Buttons/Buttons.styled';
+import { Button } from '../../App/App.styled';
 import { useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { useDispatch, useSelector, connect } from 'react-redux';
 import { Notify } from "notiflix";
 import { addContact } from '../../redux/PhoneBook/actions';
-import { contacts } from '../../redux/PhoneBook/selectors';
+import { getContacts } from '../../redux/PhoneBook/selectors';
 
 function ContactsForm() {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 
-  const stateContact = useSelector(contacts);
+  const stateContact = useSelector(getContacts);
   const dispatch = useDispatch();
 
   const nameId = uuidv4();
@@ -87,7 +87,7 @@ function ContactsForm() {
 }
 
 const mapStateToProps = state => ({
-  contacts: state.contacts.item,
+  contacts: getContacts(state),
 });
 
 const mapDispatchToProps = dispatch => ({
