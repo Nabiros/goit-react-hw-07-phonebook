@@ -1,59 +1,52 @@
-import { Form, Label, Input} from './ContactsForm.styled';
+import { useState } from 'react';
+import { useCreateContactMutation, useFetchContactsQuery } from '../../apiService';
+import { Form, Label, Input } from './ContactsForm.styled';
 import { Button } from '../../App/App.styled';
-import { useState } from "react";
-import { v4 as uuidv4 } from 'uuid';
-import { useDispatch, useSelector, connect } from 'react-redux';
-import { Notify } from "notiflix";
-import { addContact } from '../../redux/PhoneBook/actions';
-import { getContacts } from '../../redux/PhoneBook/selectors';
+import toast, { Toaster } from 'react-hot-toast';
 
-function ContactsForm() {
+export default function ContactsForm() {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
+  const [createContact] = useCreateContactMutation();
+  const {data: contacts} = useFetchContactsQuery();
 
-  const stateContact = useSelector(getContacts);
-  const dispatch = useDispatch();
-
-  const nameId = uuidv4();
-  const numberId = uuidv4();
-
-  const handleChange = e => {
-    const { value, name } = e.target;
-
-    switch (name) {
+  const handleChange = (e) => {
+    switch (e.target.name) {
       case 'name':
-        setName(value);
+        setName(e.target.value);
         break;
       case 'number':
-        setNumber(value);
+        setNumber(e.target.value);
         break;
       default:
         return;
     }
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    newContact();
-    setName('');
-    setNumber('');
-  };
-
-  const newContact = () => {
-    const addToContact = {
-      name,
-      number,
+    const notification = () => {
+      toast(`${name} is already in contacts`, {
+        style: {
+          borderRadius: '10px',
+          background: '#e4cc17',
+          color: '#000',
+          duration: 2000,
+        },})};
+  
+    const checkContact = contacts.find(
+      (contact) => contact.name.toLowerCase() === name.toLowerCase()
+      
+    );
+    if (checkContact) {
+      notification();
+      return;
     };
-    stateContact.some(
-      contact => contact.name.toLowerCase() === addToContact.name.toLowerCase(),
-    )
-      ? notification(addToContact.name)
-      : dispatch(addContact(addToContact));
+    
+    createContact({ name, number });
+    setName("");
+    setNumber("");
   };
-
-  const notification = name =>
-    Notify.warning(name + " is already in contacts.")
 
   return (
     <>
@@ -63,7 +56,6 @@ function ContactsForm() {
           onChange={handleChange}
           type="text"
           name="name"
-          id={nameId}
           value={name}
           pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
           title="Имя может состоять только из букв, апострофа, тире и пробелов. Например Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan и т. п."
@@ -74,7 +66,6 @@ function ContactsForm() {
           onChange={handleChange}
           type="tel"
           name="number"
-          id={numberId}
           value={number}
           pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
           title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
@@ -82,17 +73,9 @@ function ContactsForm() {
         />
         <Button type="submit"> Add contact</Button>
       </Form>
+      <Toaster />
     </>
   );
 }
 
-const mapStateToProps = state => ({
-  contacts: getContacts(state),
-});
-
-const mapDispatchToProps = dispatch => ({
-  onSubmit: data => dispatch(addContact(data)),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(ContactsForm);
 
